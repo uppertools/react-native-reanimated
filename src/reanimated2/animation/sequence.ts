@@ -11,8 +11,16 @@ export function withSequence(
   ..._animations: NextAnimation<AnimationObject>[]
 ): Animation<SequenceAnimation> {
   'worklet';
+
+  const animationFunctionCall = {
+    functionName: 'withSequence',
+    functionArguments: [...arguments],
+    animatedArgumentsIndices: [...arguments].map((_, i)=>i), 
+  };
+
   return defineAnimation<SequenceAnimation>(
     _animations[0] as SequenceAnimation,
+    animationFunctionCall,
     () => {
       'worklet';
       const animations = _animations.map((a) => {
@@ -80,7 +88,7 @@ export function withSequence(
         current: firstAnimation.current,
         callback,
       } as SequenceAnimation;
-    }
+    },
   );
 }
 

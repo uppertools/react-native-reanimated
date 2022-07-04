@@ -20,8 +20,14 @@ export function withRepeat(
   callback?: AnimationCallback
 ): Animation<RepeatAnimation> {
   'worklet';
+  
+  const animationFunctionCall = {
+    functionName: 'withRepeat',
+    functionArguments: [...arguments],
+    animatedArgumentsIndices: [0], 
+  };
 
-  return defineAnimation<RepeatAnimation>(_nextAnimation, () => {
+  return defineAnimation<RepeatAnimation>(_nextAnimation, animationFunctionCall, () => {
     'worklet';
 
     const nextAnimation: RepeatAnimation =

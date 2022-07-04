@@ -241,7 +241,7 @@ const Reanimated2 = () => (
     <Stack.Screen
       name="Home"
       options={{ title: '🎬 Reanimated 2.x Examples' }}
-      children={(props) => <MainScreen {...props} />}
+      component={AnimatedStyleUpdateExample}
     />
     {Object.keys(SCREENS).map((name) => (
       <Stack.Screen
@@ -255,7 +255,7 @@ const Reanimated2 = () => (
 );
 
 function App(): React.ReactElement {
-  return <NavigationContainer>{Reanimated2()}</NavigationContainer>;
+  return <AnimatedStyleUpdateExample />;
 }
 
 export const styles = StyleSheet.create({

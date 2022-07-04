@@ -36,7 +36,13 @@ export function withSpring(
 ): Animation<SpringAnimation> {
   'worklet';
 
-  return defineAnimation<SpringAnimation>(toValue, () => {
+  const animationFunctionCall = {
+    functionName: 'withSpring',
+    functionArguments: [...arguments],
+    animatedArgumentsIndices: [0],
+  };
+
+  return defineAnimation<SpringAnimation>(toValue, animationFunctionCall, () => {
     'worklet';
 
     // TODO: figure out why we can't use spread or Object.assign here

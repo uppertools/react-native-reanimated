@@ -16,6 +16,7 @@ import {
   Animation,
   AnimationObject,
   Timestamp,
+  AnimationFunctionCall,
 } from '../commonTypes';
 import NativeReanimatedModule from '../NativeReanimated';
 
@@ -248,7 +249,7 @@ type AnimationToDecoration<T extends AnimationObject | StyleLayoutAnimation> =
 
 export function defineAnimation<
   T extends AnimationObject | StyleLayoutAnimation
->(starting: AnimationToDecoration<T>, factory: () => T): T {
+>(starting: AnimationToDecoration<T>, animationFunctionCall: AnimationFunctionCall, factory: () => T): T {
   'worklet';
   if (IN_STYLE_UPDATER) {
     return starting as T;
@@ -257,6 +258,7 @@ export function defineAnimation<
     'worklet';
     const animation = factory();
     decorateAnimation<T>(animation);
+    animation.animationFunctionCall = animationFunctionCall;
     return animation;
   };
 

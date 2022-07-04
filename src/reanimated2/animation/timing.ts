@@ -35,7 +35,13 @@ export function withTiming(
 ): Animation<TimingAnimation> {
   'worklet';
 
-  return defineAnimation<TimingAnimation>(toValue, () => {
+  const animationFunctionCall = {
+    functionName: 'withTiming',
+    functionArguments: [...arguments],
+    animatedArgumentsIndices: [0],
+  };
+
+  return defineAnimation<TimingAnimation>(toValue, animationFunctionCall, () => {
     'worklet';
     const config: Required<TimingConfig> = {
       duration: 300,

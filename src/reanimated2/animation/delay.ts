@@ -7,8 +7,14 @@ export function withDelay(
   _nextAnimation: NextAnimation<DelayAnimation>
 ): Animation<DelayAnimation> {
   'worklet';
-  return defineAnimation<DelayAnimation>(_nextAnimation, () => {
+  const animationFunctionCall = {
+    functionName: 'withDelay',
+    functionArguments: [...arguments],
+    animatedArgumentsIndices: [1], 
+  };
+  return defineAnimation<DelayAnimation>(_nextAnimation, animationFunctionCall, () => {
     'worklet';
+    
     const nextAnimation =
       typeof _nextAnimation === 'function' ? _nextAnimation() : _nextAnimation;
 
