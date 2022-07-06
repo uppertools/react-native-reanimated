@@ -8,23 +8,35 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { View, Button } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 function AnimatedStyleUpdateExample(): React.ReactElement {
   const randomWidth = useSharedValue(10);
   const randomWidth2 = useSharedValue(10);
+
+  const [toggle, setToggle] = useState(false);
 
   const config = {
     duration: 500,
     easing: Easing.bezierFn(0.5, 0.01, 0, 1),
   };
 
-  // const style = useAnimatedStyle(() => {
+  // const style = useAnimatedStyle(toggle ? () => {
+  //   'worklet';
   //   return {
-  //     width: withTiming(randomWidth.value, config),
+  //     width: withSequence( withTiming(randomWidth.value, config), withTiming(randomWidth2.value, config)),
+  //   };
+  // } : () => {
+  //   'worklet';
+  //   return {
+  //     width: withSequence(withTiming(randomWidth2.value, config)),
   //   };
   // });
 
+  const style1 = withSequence(withTiming(randomWidth2, config), withTiming(randomWidth, config));
+  const style2 = withDelay(1000, withSpring(randomWidth));
+
+  
 
   return (
     <View
@@ -37,9 +49,9 @@ function AnimatedStyleUpdateExample(): React.ReactElement {
         style={[
           { width: 100, height: 80, backgroundColor: 'blue', margin: 30 },
           {
-            width: withSequence(withTiming(randomWidth, config), withTiming(randomWidth2, config)),
+            width:  toggle ? style1 : style2,
           },
-          //style,
+          //style
         ]}
       />
       <Button
@@ -47,6 +59,7 @@ function AnimatedStyleUpdateExample(): React.ReactElement {
         onPress={() => {
           randomWidth.value = Math.random() * 350;
           randomWidth2.value = Math.random() * 350;
+          setToggle(!toggle);
         }}
       />
     </View>

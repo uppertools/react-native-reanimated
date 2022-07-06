@@ -537,7 +537,7 @@ export default function createAnimatedComponent(
 
   const isFunction = (v) => {
     'worklet';
-    return typeof v === 'function'; // && v.isAnimationFunction;
+    return typeof v === 'function';
   };
 
   return React.forwardRef<Component>((props, ref) => {
@@ -610,6 +610,11 @@ export default function createAnimatedComponent(
     };
 
     let sharedValueId = 0;
+
+   // updater._closure = {}
+
+    //console.log("CLOSURE", updater._closure)
+    
 
     // add shared values to function closure to run updater on value change
     // normally in useAnimatedStyle it's done by babel plugin
