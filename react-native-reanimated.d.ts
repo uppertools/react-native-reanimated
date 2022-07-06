@@ -637,12 +637,12 @@ declare module 'react-native-reanimated' {
     velocity?: number;
   }
   export function withTiming<T extends AnimatableValue>(
-    toValue: T,
+    toValue: T | SharedValue<T>,
     userConfig?: WithTimingConfig,
     callback?: AnimationCallback
   ): T;
   export function withSpring<T extends AnimatableValue>(
-    toValue: T,
+    toValue: T | SharedValue<T>,
     userConfig?: WithSpringConfig,
     callback?: AnimationCallback
   ): T;

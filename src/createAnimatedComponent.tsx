@@ -37,32 +37,12 @@ import {
   ViewRefSet,
 } from './reanimated2/ViewDescriptorsSet';
 import { getShadowNodeWrapperFromRef } from './reanimated2/fabricUtils';
-import { useAnimatedStyle } from './reanimated2/hook/useAnimatedStyle';
-import * as animation from './reanimated2/animation';
+import { flattenArray, NestedArray } from './reanimated2/utils';
+import { withInlineStyles } from './withInlineStyles';
 
 function dummyListener() {
   // empty listener we use to assign to listener properties for which animated
   // event is used.
-}
-
-type NestedArray<T> = T | NestedArray<T>[];
-function flattenArray<T>(array: NestedArray<T>): T[] {
-  if (!Array.isArray(array)) {
-    return [array];
-  }
-  const resultArr: T[] = [];
-
-  const _flattenArray = (arr: NestedArray<T>[]): void => {
-    arr.forEach((item) => {
-      if (Array.isArray(item)) {
-        _flattenArray(item);
-      } else {
-        resultArr.push(item);
-      }
-    });
-  };
-  _flattenArray(array);
-  return resultArr;
 }
 
 function onlyAnimatedStyles(styles: StyleProps[]) {
@@ -530,118 +510,12 @@ export default function createAnimatedComponent(
     Component.displayName || Component.name || 'Component'
   })`;
 
-  const isSharedValue = (v) => {
-    'worklet';
-    return typeof v === 'object' && typeof v.value !== undefined;
-  };
-
-  const isFunction = (v) => {
-    'worklet';
-    return typeof v === 'function';
-  };
+  const AnimatedComponentWithInlineStyles = withInlineStyles(AnimatedComponent);
 
   return React.forwardRef<Component>((props, ref) => {
-    // TODO: extract this whole code to a separate HOC or something
-    const styles = [];
-    const sharedValuesStyles = {};
-    const functionsStyles = {};
-
-    flattenArray(props.style).forEach((style) => {
-      const newStyle = {};
-      // style returned from useAnimatedStyle
-      if (style.viewDescriptors) {
-        styles.push(style);
-        return;
-      }
-      for (const key in style) {
-        // case {width: sharedValue}
-        if (isSharedValue(style[key])) {
-          sharedValuesStyles[key] = style[key];
-          // cases like  {width: withTiming(sharedValue)}
-        } else if (isFunction(style[key])) {
-          functionsStyles[key] = style[key];
-        } else {
-          newStyle[key] = style[key];
-        }
-      }
-      styles.push(newStyle);
-    });
-
-    const updater = () => {
-      'worklet';
-      const style = {};
-
-      for (const key in sharedValuesStyles) {
-        style[key] = sharedValuesStyles[key].value;
-      }
-
-      // input: f: () -> animation object | sharedvalue | number/string/etc
-      // output: animation
-      const parseTree = (val) => {
-        'worklet';
-        
-        if (isSharedValue(val)) {
-          return val.value;
-        } else if (isFunction(val)) {
-          const animationObject = val();
-          const {
-            functionName,
-            functionArguments,
-            animatedArgumentsIndices = [],
-          } = animationObject.animationFunctionCall;
-          const parsedFunctionArguments = functionArguments.map((arg, i) =>
-            animatedArgumentsIndices.includes(i) ? parseTree(arg) : arg
-          );
-          const fun = animation[functionName];
-          return fun(...parsedFunctionArguments);
-        } else {
-          return val;
-        }
-      };
-
-      // functions withTiming etc. must be called in updater function
-      // also functions can be nested (for example withDelay(100, withTiming(...)))
-      // so they create a tree of calls and we need to traverse the tree to call them all
-      for (const key in functionsStyles) {
-        style[key] = parseTree(functionsStyles[key]);
-      }
-
-      return style;
-    };
-
-    let sharedValueId = 0;
-
-   // updater._closure = {}
-
-    //console.log("CLOSURE", updater._closure)
-    
-
-    // add shared values to function closure to run updater on value change
-    // normally in useAnimatedStyle it's done by babel plugin
-    const parseTree = (val) => {
-      if (isSharedValue(val)) {
-        updater._closure['_shared_value#' + sharedValueId] = val;
-        sharedValueId += 1;
-      } else if (isFunction(val)) {
-        const animationObject = val();
-        const { functionArguments, animatedArgumentsIndices = [] } =
-          animationObject.animationFunctionCall;
-        functionArguments.forEach((arg, i) =>
-          animatedArgumentsIndices.includes(i) ? parseTree(arg) : arg
-        );
-      }
-    };
-
-    for (const key in functionsStyles) {
-      parseTree(functionsStyles[key]);
-    }
-
-    const animatedStyle = useAnimatedStyle(updater);
-
     return (
-      <AnimatedComponent
+      <AnimatedComponentWithInlineStyles
         {...props}
-        style={[...styles, animatedStyle]}
         {...(ref === null ? null : { forwardedRef: ref })}
       />
     );

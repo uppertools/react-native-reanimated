@@ -14,8 +14,10 @@ export function withSequence(
 
   const animationFunctionCall = {
     functionName: 'withSequence',
+    // eslint-disable-next-line prefer-rest-params
     functionArguments: [...arguments],
-    animatedArgumentsIndices: [...arguments].map((_, i)=>i), 
+    // eslint-disable-next-line prefer-rest-params
+    animatedArgumentsIndices: [...arguments].map((_, i) => i),
   };
 
   return defineAnimation<SequenceAnimation>(
@@ -88,7 +90,7 @@ export function withSequence(
         current: firstAnimation.current,
         callback,
       } as SequenceAnimation;
-    },
+    }
   );
 }
 

@@ -454,13 +454,18 @@ export function useAnimatedStyle<T extends AnimatedStyle>(
   const maybeViewRef = NativeReanimatedModule.native ? undefined : viewsRef;
 
   const areListsEqual = (a1: DependencyList, a2: DependencyList) => {
-    for(let i = 0; i < (a1?.length || 0); ++i) {
-      if(a1?.[i] !== a2?.[i]) return false;
+    for (let i = 0; i < (a1?.length || 0); ++i) {
+      if (a1?.[i] !== a2?.[i]) return false;
     }
     return true;
-  }
+  };
 
-  if(dependencies.length !== depsRef.current[0]?.length || !areListsEqual(dependencies, depsRef.current)) {
+  // dependencies can change in length and React doesn't like that
+  // so in useEffect instead of passing just a list of dependencies we pass the list of dependencies itself as a dependency
+  if (
+    dependencies.length !== depsRef.current[0]?.length ||
+    !areListsEqual(dependencies, depsRef.current)
+  ) {
     depsRef.current = [dependencies];
   }
 
