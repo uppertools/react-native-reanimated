@@ -16,16 +16,6 @@ import {
   InitialComponentProps,
 } from './AnimatedComponent';
 
-const isSharedValue = (v: any) => {
-  'worklet';
-  return typeof v === 'object' && 'value' in v;
-};
-
-const isFunction = (v: any) => {
-  'worklet';
-  return typeof v === 'function';
-};
-
 export const withInlineStyles = (
   Component: ComponentType<AnimatedComponentProps<InitialComponentProps>>
 ): ComponentType<AnimatedComponentProps<InitialComponentProps>> => {
@@ -45,10 +35,10 @@ export const withInlineStyles = (
       }
       for (const key in style) {
         // case {width: sharedValue}
-        if (isSharedValue(style[key])) {
+        if (typeof style[key] === 'object' && 'value' in style[key]) {
           sharedValuesStyles[key] = style[key];
           // cases like  {width: withTiming(sharedValue)}
-        } else if (isFunction(style[key])) {
+        } else if (typeof style[key] === 'function') {
           functionsStyles[key] = style[key];
         } else {
           newStyle[key] = style[key];
