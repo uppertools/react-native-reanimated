@@ -1,4 +1,4 @@
-import React, { Component, ComponentType, MutableRefObject, Ref } from 'react';
+import React, { Component, ComponentType, MutableRefObject } from 'react';
 import { findNodeHandle, Platform, StyleSheet } from 'react-native';
 import WorkletEventHandler from './reanimated2/WorkletEventHandler';
 import setAndForwardRef from './setAndForwardRef';
@@ -22,23 +22,20 @@ import {
   shouldBeUseWeb,
 } from './reanimated2/PlatformChecker';
 import { initialUpdaterRun } from './reanimated2/animation';
-import {
-  BaseAnimationBuilder,
-  EntryExitAnimationFunction,
-  ILayoutAnimationBuilder,
-} from './reanimated2/layoutReanimation';
+import { EntryExitAnimationFunction } from './reanimated2/layoutReanimation';
 import {
   SharedValue,
   StyleProps,
   ShadowNodeWrapper,
 } from './reanimated2/commonTypes';
-import {
-  ViewDescriptorsSet,
-  ViewRefSet,
-} from './reanimated2/ViewDescriptorsSet';
 import { getShadowNodeWrapperFromRef } from './reanimated2/fabricUtils';
-import { flattenArray, NestedArray } from './reanimated2/utils';
+import { flattenArray } from './reanimated2/utils';
 import { withInlineStyles } from './withInlineStyles';
+import {
+  AnimatedComponentProps,
+  AnimatedProps,
+  InitialComponentProps,
+} from './AnimatedComponent';
 
 function dummyListener() {
   // empty listener we use to assign to listener properties for which animated
@@ -74,33 +71,6 @@ const has = <K extends string>(
   return false;
 };
 
-interface AnimatedProps extends Record<string, unknown> {
-  viewDescriptors?: ViewDescriptorsSet;
-  viewsRef?: ViewRefSet<unknown>;
-  initial?: SharedValue<StyleProps>;
-}
-
-export type AnimatedComponentProps<P extends Record<string, unknown>> = P & {
-  forwardedRef?: Ref<Component>;
-  style?: NestedArray<StyleProps>;
-  animatedProps?: Partial<AnimatedComponentProps<AnimatedProps>>;
-  animatedStyle?: StyleProps;
-  layout?:
-    | BaseAnimationBuilder
-    | ILayoutAnimationBuilder
-    | typeof BaseAnimationBuilder;
-  entering?:
-    | BaseAnimationBuilder
-    | typeof BaseAnimationBuilder
-    | EntryExitAnimationFunction
-    | Keyframe;
-  exiting?:
-    | BaseAnimationBuilder
-    | typeof BaseAnimationBuilder
-    | EntryExitAnimationFunction
-    | Keyframe;
-};
-
 type Options<P> = {
   setNativeProps: (ref: ComponentRef, props: P) => void;
 };
@@ -108,11 +78,6 @@ type Options<P> = {
 interface ComponentRef extends Component {
   setNativeProps?: (props: Record<string, unknown>) => void;
   getScrollableNode?: () => ComponentRef;
-}
-
-export interface InitialComponentProps extends Record<string, unknown> {
-  ref?: Ref<Component>;
-  collapsable?: boolean;
 }
 
 export default function createAnimatedComponent(

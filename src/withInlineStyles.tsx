@@ -14,7 +14,7 @@ import {
 import {
   AnimatedComponentProps,
   InitialComponentProps,
-} from './createAnimatedComponent';
+} from './AnimatedComponent';
 
 const isSharedValue = (v: any) => {
   'worklet';
