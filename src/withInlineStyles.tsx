@@ -1,8 +1,16 @@
 import React, { Component, ComponentType } from 'react';
 import { useAnimatedStyle } from './reanimated2/hook/useAnimatedStyle';
-import * as animation from './reanimated2/animation';
+import * as animationModule from './reanimated2/animation';
 import { flattenArray } from './reanimated2/utils';
-import { StyleProps } from './reanimated2/commonTypes';
+import {
+  AnimatableValue,
+  AnimatedStyle,
+  AnimationFunctionCall,
+  SharedValue,
+  StyleProps,
+  Animation,
+  AnimationObject,
+} from './reanimated2/commonTypes';
 import {
   AnimatedComponentProps,
   InitialComponentProps,
@@ -10,7 +18,7 @@ import {
 
 const isSharedValue = (v: any) => {
   'worklet';
-  return typeof v === 'object' && typeof v.value !== undefined;
+  return typeof v === 'object' && 'value' in v;
 };
 
 const isFunction = (v: any) => {
@@ -20,16 +28,16 @@ const isFunction = (v: any) => {
 
 export const withInlineStyles = (
   Component: ComponentType<AnimatedComponentProps<InitialComponentProps>>
-) => {
+): ComponentType<AnimatedComponentProps<InitialComponentProps>> => {
   const ComponentWithInlineStyles = (
     props: AnimatedComponentProps<InitialComponentProps>
   ) => {
     const styles: StyleProps[] = [];
-    const sharedValuesStyles = {};
-    const functionsStyles = {};
+    const sharedValuesStyles: StyleProps = {};
+    const functionsStyles: StyleProps = {};
 
     flattenArray(props.style).forEach((style) => {
-      const newStyle = {};
+      const newStyle: StyleProps = {};
       // style returned from useAnimatedStyle
       if (style?.viewDescriptors) {
         styles.push(style);
@@ -51,30 +59,31 @@ export const withInlineStyles = (
 
     const updater = () => {
       'worklet';
-      const style = {};
+      const style: AnimatedStyle = {};
 
       for (const key in sharedValuesStyles) {
         style[key] = sharedValuesStyles[key].value;
       }
 
-      // input: f: () -> animation object | sharedvalue | number/string/etc
-      // output: animation
-      const parseTree = (val) => {
+      const parseTree = <T extends AnimatableValue, S extends AnimationObject>(
+        val: (() => Animation<S>) | SharedValue<T> | AnimatableValue
+      ): AnimatableValue | Animation<S> => {
         'worklet';
 
-        if (isSharedValue(val)) {
+        if (typeof val === 'object' && 'value' in val) {
           return val.value;
-        } else if (isFunction(val)) {
+        } else if (typeof val === 'function') {
           const animationObject = val();
           const {
-            functionName,
-            functionArguments,
+            functionName = '',
+            functionArguments = [],
             animatedArgumentsIndices = [],
-          } = animationObject.animationFunctionCall;
+          } = animationObject.animationFunctionCall ?? {};
           const parsedFunctionArguments = functionArguments.map((arg, i) =>
             animatedArgumentsIndices.includes(i) ? parseTree(arg) : arg
           );
-          const fun = animation[functionName];
+
+          const fun = (animationModule as any)[functionName];
           return fun(...parsedFunctionArguments);
         } else {
           return val;
@@ -95,15 +104,17 @@ export const withInlineStyles = (
 
     // add shared values to function closure to run updater on value change
     // normally in useAnimatedStyle it's done by babel plugin
-    const parseTree = (val) => {
-      if (isSharedValue(val)) {
+    const parseTree = <T extends AnimatableValue, S extends AnimationObject>(
+      val: (() => Animation<S>) | SharedValue<T> | AnimatableValue
+    ): void => {
+      if (typeof val === 'object' && 'value' in val) {
         // @ts-ignore disable-next-line
         updater._closure['_shared_value#' + sharedValueId] = val;
         sharedValueId += 1;
-      } else if (isFunction(val)) {
+      } else if (typeof val === 'function') {
         const animationObject = val();
         const { functionArguments, animatedArgumentsIndices = [] } =
-          animationObject.animationFunctionCall;
+          animationObject.animationFunctionCall as AnimationFunctionCall;
         functionArguments.forEach((arg, i) =>
           animatedArgumentsIndices.includes(i) ? parseTree(arg) : arg
         );

@@ -249,7 +249,11 @@ type AnimationToDecoration<T extends AnimationObject | StyleLayoutAnimation> =
 
 export function defineAnimation<
   T extends AnimationObject | StyleLayoutAnimation
->(starting: AnimationToDecoration<T>, animationFunctionCall: AnimationFunctionCall, factory: () => T): T {
+>(
+  starting: AnimationToDecoration<T>,
+  animationFunctionCall: AnimationFunctionCall,
+  factory: () => T
+): T {
   'worklet';
   if (IN_STYLE_UPDATER) {
     return starting as T;
@@ -273,20 +277,4 @@ export function cancelAnimation<T>(sharedValue: SharedValue<T>): void {
   'worklet';
   // setting the current value cancels the animation if one is currently running
   sharedValue.value = sharedValue.value; // eslint-disable-line no-self-assign
-}
-
-// TODO it should work only if there was no animation before.
-export function withStartValue(
-  startValue: AnimatableValue,
-  animation: NextAnimation<AnimationObject>
-): Animation<AnimationObject> {
-  'worklet';
-  return defineAnimation(startValue, () => {
-    'worklet';
-    if (!_WORKLET && typeof animation === 'function') {
-      animation = animation();
-    }
-    (animation as Animation<AnimationObject>).current = startValue;
-    return animation as Animation<AnimationObject>;
-  });
 }

@@ -110,7 +110,7 @@ export interface AnimationObject {
     timestamp: Timestamp,
     previousAnimation: any
   ) => void;
-  animationFunctionCall: AnimationFunctionCall;
+  animationFunctionCall?: AnimationFunctionCall;
 }
 
 export interface Animation<T extends AnimationObject> extends AnimationObject {
