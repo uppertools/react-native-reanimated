@@ -103,7 +103,7 @@ For simple animations in `useAnimatedStyle` hook without any calculations like t
 ```js
 const animatedStyle = useAnimatedStyle(() => {
   return {
-    width: withSpring(offset.value),
+    width: withSpring(width.value),
   };
 });
 
@@ -113,23 +113,23 @@ const animatedStyle = useAnimatedStyle(() => {
 you can omit `useAnimatedStyle` and use inline styles like this to save some typing:
 
 ```js
-<Animated.View style={{ width: withSpring(offset) }} />
+<Animated.View style={{ width: withSpring(width) }} />
 ```
 
 You can also use shared value directly in inline style:
 
 ```js
-<Animated.View style={{ width: offset }} />
+<Animated.View style={{ width: width }} />
 ```
 
-The width of the view will change when `offset` value changes.
+The width of the view will change when `width` value changes.
 
-Note that we're not using `.value` getter in inline styles. If you use `offset.value`, reanimated uses just current value of shared value. Let's look at an example:
+Note that we're not using `.value` getter in inline styles. If you use `width.value`, reanimated uses just current value of shared value. Let's look at an example:
 
 ```js
-offset.value = 5;
+width.value = 5;
 ...
-<Animated.View style={{ width: offset.value }} />
+<Animated.View style={{ width: width.value }} />
 ```
 
 is equivalent to:
