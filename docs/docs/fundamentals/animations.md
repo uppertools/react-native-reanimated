@@ -96,6 +96,52 @@ This approach is more convenient in many cases, especially when view properties 
 Also, keeping all the aspects of view styles and transitions colocated often makes it easier to keep control over your components' code.
 It forces you to have everything defined in one place vs scattered around the codebase allowing for animated transitions being triggered from anywhere.
 
+## Animations in inline styles
+
+For simple animations in `useAnimatedStyle` hook without any calculations like this:
+
+```js
+const animatedStyle = useAnimatedStyle(() => {
+  return {
+    width: withSpring(offset.value),
+  };
+});
+
+<Animated.View style={animatedStyle} />
+```
+
+you can omit `useAnimatedStyle` and use inline styles like this to save some typing:
+
+```js
+<Animated.View style={{ width: withSpring(offset) }} />
+```
+
+You can also use shared value directly in inline style:
+
+```js
+<Animated.View style={{ width: offset }} />
+```
+
+The width of the view will change when `offset` value changes.
+
+Note that we're not using `.value` getter in inline styles. If you use `offset.value`, reanimated uses just current value of shared value. Let's look at an example:
+
+```js
+offset.value = 5;
+...
+<Animated.View style={{ width: offset.value }} />
+```
+
+is equivalent to:
+
+```js
+<Animated.View style={{ width: 5 }} />
+```
+
+Passing a shared value without `.value` getter causes reanimated to watch for shared value changes.
+
+
+
 ## Interrupting Animated Updates
 
 Animated UI updates, by definition, take time to perform.
